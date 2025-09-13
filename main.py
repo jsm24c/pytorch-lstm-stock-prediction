@@ -78,3 +78,27 @@ for i in range(num_epochs):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+
+model.eval()
+y_test_pred = model(X_test)
+
+y_train_pred = scaler.inverse_transform(y_train_pred.cpu().detach().numpy())
+Y_train = scaler.inverse_transform(Y_train.cpu().detach().numpy())
+y_test_pred = scaler.inverse_transform(y_test_pred.cpu().detach().numpy())
+Y_test = scaler.inverse_transform(Y_test.cpu().detach().numpy())
+
+train_rmse =  root_mean_squared_error(Y_train[:,0], y_train_pred[:,0])
+test_rmse = root_mean_squared_error(Y_test[:,0], y_test_pred[:,0])
+
+fig = plt.figure(figsize=(12,10))
+
+gs = fig.add_gridspec(4, 1)
+
+ax1 = fig.add_subplot(gs[0:3, 0])
+
+ax1.plot(df.iloc[len(y_test):].index, y_test, color = 'purple', label='Actual Price')
+ax1.plot(df.iloc[len(y_test):].index, y_test_pred, color = 'cyan', label='Predicted Price')
+ax1.legend()
+plt.title(f"{ticker} Price Prediction")
+plt.xlabel('Date')
+plt.ylabel('Price')
