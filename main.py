@@ -39,9 +39,9 @@ data = np.array(data)
 train_size = int(len(data) * 0.8)
 
 X_train = torch.from_numpy(data[:train_size, :-1, :]).type(torch.Tensor).to(device)
-Y_train = torch.from_numpy(data[:train_size, -1, :]).type(torch.Tensor).to(device)
+y_train = torch.from_numpy(data[:train_size, -1, :]).type(torch.Tensor).to(device)
 X_test = torch.from_numpy(data[train_size:, :-1, :]).type(torch.Tensor).to(device)
-Y_test = torch.from_numpy(data[train_size:, -1, :]).type
+y_test = torch.from_numpy(data[train_size:, -1, :]).type(torch.Tensor).to(device)
 
 class LSTMModel(nn.Module):
 
@@ -70,7 +70,7 @@ num_epochs = 100
 for i in range(num_epochs):
     y_train_pred = model(X_train)
 
-    loss = criterion(y_train_pred, Y_train)
+    loss = criterion(y_train_pred, y_train)
 
     if i % 25 == 0:
         print(i, loss.item())
@@ -83,12 +83,12 @@ model.eval()
 y_test_pred = model(X_test)
 
 y_train_pred = scaler.inverse_transform(y_train_pred.cpu().detach().numpy())
-Y_train = scaler.inverse_transform(Y_train.cpu().detach().numpy())
+y_train = scaler.inverse_transform(y_train.cpu().detach().numpy())
 y_test_pred = scaler.inverse_transform(y_test_pred.cpu().detach().numpy())
-Y_test = scaler.inverse_transform(Y_test.cpu().detach().numpy())
+y_test = scaler.inverse_transform(y_test.cpu().detach().numpy())
 
-train_rmse =  root_mean_squared_error(Y_train[:,0], y_train_pred[:,0])
-test_rmse = root_mean_squared_error(Y_test[:,0], y_test_pred[:,0])
+train_rmse =  root_mean_squared_error(y_train[:,0], y_train_pred[:,0])
+test_rmse = root_mean_squared_error(y_test[:,0], y_test_pred[:,0])
 
 fig = plt.figure(figsize=(12,10))
 
@@ -96,9 +96,21 @@ gs = fig.add_gridspec(4, 1)
 
 ax1 = fig.add_subplot(gs[0:3, 0])
 
-ax1.plot(df.iloc[len(y_test):].index, y_test, color = 'purple', label='Actual Price')
-ax1.plot(df.iloc[len(y_test):].index, y_test_pred, color = 'cyan', label='Predicted Price')
+dates = df.index[-len(y_test):]  
+ax1.plot(dates, y_test.flatten(), color='purple', label='Actual Price')
+ax1.plot(dates, y_test_pred.flatten(), color='cyan', label='Predicted Price')
 ax1.legend()
-plt.title(f"{ticker} Price Prediction")
+
+plt.title(f"NASDAQ Futures Price Prediction")
 plt.xlabel('Date')
 plt.ylabel('Price')
+
+ax2 = fig.add_subplot(gs[3, 0])
+ax2.axhline(test_rmse, color='cyan', label='Test RMSE')
+ax2.plot(dates, abs(y_test.flatten() - y_test_pred.flatten()), 'r', label='Prediction Error')
+
+plt.xlabel('Date')
+plt.ylabel('Error')
+plt.tight_layout()
+
+plt.show()
