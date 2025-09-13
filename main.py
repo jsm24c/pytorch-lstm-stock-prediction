@@ -38,11 +38,10 @@ data = np.array(data)
 
 train_size = int(len(data) * 0.8)
 
-X_train = torch.from_numpy(data[:train_size, :-1, :])
-Y_train = torch.from_numpy(data[:train_size, -1, :])    #the last element
-
-X_test = torch.from_numpy(data[train_size:, :-1, :])
-Y_test = torch.from_numpy(data[train_size:, -1, :])
+X_train = torch.from_numpy(data[:train_size, :-1, :]).type(torch.Tensor).to(device)
+Y_train = torch.from_numpy(data[:train_size, -1, :]).type(torch.Tensor).to(device)
+X_test = torch.from_numpy(data[train_size:, :-1, :]).type(torch.Tensor).to(device)
+Y_test = torch.from_numpy(data[train_size:, -1, :]).type
 
 class LSTMModel(nn.Module):
 
@@ -62,3 +61,20 @@ class LSTMModel(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
     
+model = LSTMModel(input_dim=1, hidden_dim=50, num_layers=2, output_dim=1).to(device) 
+
+criterion = nn.MSELoss()
+optimizer = optim.Adam(model.parameters(), lr=0.001)
+num_epochs = 100
+
+for i in range(num_epochs):
+    y_train_pred = model(X_train)
+
+    loss = criterion(y_train_pred, Y_train)
+
+    if i % 25 == 0:
+        print(i, loss.item())
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
