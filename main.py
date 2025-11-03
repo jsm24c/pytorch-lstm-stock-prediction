@@ -95,22 +95,20 @@ fig = plt.figure(figsize=(12,10))
 gs = fig.add_gridspec(4, 1)
 
 ax1 = fig.add_subplot(gs[0:3, 0])
-
-dates = df.index[-len(y_test):]  
-ax1.plot(dates, y_test.flatten(), color='purple', label='Actual Price')
-ax1.plot(dates, y_test_pred.flatten(), color='cyan', label='Predicted Price')
+ax1.plot(df.iloc[-len(y_test):].index, y_test, color='cyan', label='Actual Stock Price')
+ax1.plot(df.iloc[-len(y_test):].index, y_test_pred, color='magenta', label='Predicted Stock Price')
 ax1.legend()
-
-plt.title(f"NASDAQ Futures Price Prediction")
-plt.xlabel('Date')
-plt.ylabel('Price')
+plt.title(f"{ticker} Stock Price Prediction")
+plt.xlabel("Date")
+plt.ylabel("Stock Price")
 
 ax2 = fig.add_subplot(gs[3, 0])
-ax2.axhline(test_rmse, color='cyan', label='Test RMSE')
-ax2.plot(dates, abs(y_test.flatten() - y_test_pred.flatten()), 'r', label='Prediction Error')
-
-plt.xlabel('Date')
-plt.ylabel('Error')
+ax2.axhline(test_rmse, color='red', linestyle='--', label='Test RMSE')
+ax2.plot(df[-len(y_test):].index,abs(y_test - y_test_pred), 'r', label='Absolute Error')
+ax2.legend()
+plt.title("Absolute Error in Prediction")
+plt.xlabel("Date")
+plt.ylabel("Absolute Error")
 plt.tight_layout()
 
 plt.show()
