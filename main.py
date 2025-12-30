@@ -17,7 +17,7 @@ from sklearn.metrics import root_mean_squared_error     # For evaluating model p
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")  # Use GPU if available, otherwise CPU
 print(f"Using device: {device}")
 
-ticker = '^NDX'  # NASDAQ 100 index
+ticker = 'NTDOY'  # NASDAQ 100 index
 start_date = '2020-01-01'  # Start date for historical data
 
 df = yf.download(ticker, start=start_date)  
@@ -78,6 +78,8 @@ for i in range(num_epochs):
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
+
+    # pLEASE GIVE ME A JOB
 
 model.eval()
 y_test_pred = model(X_test)
